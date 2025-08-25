@@ -8,6 +8,11 @@ from email.mime.multipart import MIMEMultipart
 import json
 import random
 import os 
+import hashlib
+
+
+
+
 
 USERS_FILE =  "users.json"
 
@@ -21,6 +26,40 @@ def save_users(users):
     with open(USERS_FILE, "w") as f:
         json.dump(users, f)
 
+
+def mine_bitcoin_game():
+    print("💸💵 WELCOME TO MINING GAME 🤑💸💵")
+
+    while True:
+        print("\n📌 MENU1")
+        print("1 - Start New Round")
+        print("0 - Exit")
+
+        choice = input("Choose an option: ")
+
+        if choice == "0":
+            print("👋 Exiting game...")
+            break
+        elif choice == "1":
+            sender_message = input("\nEnter message: ")
+            difficulty_level = int(input("Enter difficulty level (number of leading zeros): "))
+            goal = "0" * difficulty_level
+
+            nonce = 0
+            founded = False
+
+        while not founded: 
+            data = f"{sender_message}{nonce}".encode() 
+            hash_value = hashlib.sha256(data).hexdigest()
+
+            nonce += 1
+
+            print(f"At: {nonce} hash: {hash_value[:20]}...")
+
+            if hash_value.startswith(goal): 
+                founded = True 
+            else: 
+                nonce += 1     
 
 
 
@@ -249,6 +288,7 @@ def ana_menu():
         print("3 - Bitcoin Graphic (30 Days)")
         print("4 - Get an advice (last 7 days analysis for data)")
         print("5 - Set and Check Price Alert (BTC/USD)")
+        print("6 - Mine Bitcoin Game")
         print("0 - Exit")
 
         selection = input("Please enter an option: ")
@@ -263,6 +303,8 @@ def ana_menu():
             give_advice()
         elif selection== "5":
             price_alert()    
+        elif selection == "6":
+            mine_bitcoin_game()    
         elif selection== "0":
             print("Exiting...")
             time.sleep(1)

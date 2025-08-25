@@ -1,6 +1,6 @@
 import requests
 import smtplib
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt 
 from datetime import datetime
 import time
 from email.mime.text import MIMEText
@@ -14,7 +14,9 @@ import hashlib
 
 
 
+
 USERS_FILE =  "users.json"
+CURRENT_USER_EMAIL = ""
 
 def load_users():
     if os.path.exists(USERS_FILE):
@@ -25,44 +27,16 @@ def load_users():
 def save_users(users): 
     with open(USERS_FILE, "w") as f:
         json.dump(users, f)
+def get_user_balance(email):
+    users = load_users()
+    return users.get(email, {}).get("balance", 0.0)
 
-
-def mine_bitcoin_game():
-    print("💸💵 WELCOME TO MINING GAME 🤑💸💵")
-
-    while True:
-        print("\n📌 MENU1")
-        print("1 - Start New Round")
-        print("0 - Exit")
-
-        choice = input("Choose an option: ")
-
-        if choice == "0":
-            print("👋 Exiting game...")
-            break
-        elif choice == "1":
-            sender_message = input("\nEnter message: ")
-            difficulty_level = int(input("Enter difficulty level (number of leading zeros): "))
-            goal = "0" * difficulty_level
-
-            nonce = 0
-            founded = False
-
-        while not founded: 
-            data = f"{sender_message}{nonce}".encode() 
-            hash_value = hashlib.sha256(data).hexdigest()
-
-            nonce += 1
-
-            print(f"At: {nonce} hash: {hash_value[:20]}...")
-
-            if hash_value.startswith(goal): 
-                founded = True 
-            else: 
-                nonce += 1     
-
-
-
+def add_user_balance(email, amount):
+    users = load_users()
+    if email not in users:
+        users[email] = {"password": "", "balance": 0.0}
+    users[email]["balance"] = users[email].get("balance", 0.0) + amount
+    save_users(users)
 
 def bitcoin_fiyati_goster():
     try:
@@ -229,6 +203,7 @@ def price_alert():
 
 
 def sign_in():
+    global CURRENT_USER_EMAIL
     users = load_users()
     print("\n🔑 --- Sign In ---")
     email = input("E-mail: ").strip()
@@ -240,6 +215,7 @@ def sign_in():
     password = input("Password: ").strip()
     if users[email]["password"] == password:
         print("✅ Giriş başarılı. Hoş geldiniz!")
+        CURRENT_USER_EMAIL = email
         return True
     else:
         print("❌ Şifre hatalı.")
@@ -273,7 +249,7 @@ def sign_up():
     # Kullanıcıdan kodu alma
     entered_code = input("Enter the 6-digit verification code: ").strip()
     if entered_code == verification_code:
-        users[email] = {"password": password}
+        users[email] = {"password": password, "balance": 0.0}
         save_users(users)
         print("✅ Kayıt başarılı! Giriş yapabilirsiniz.")
     else:
@@ -304,7 +280,8 @@ def ana_menu():
         elif selection== "5":
             price_alert()    
         elif selection == "6":
-            mine_bitcoin_game()    
+            from mining_game import mine_bitcoin_game
+            mine_bitcoin_game(get_user_balance, add_user_balance, CURRENT_USER_EMAIL)    
         elif selection== "0":
             print("Exiting...")
             time.sleep(1)

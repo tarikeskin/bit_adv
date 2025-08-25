@@ -8,11 +8,6 @@ from email.mime.multipart import MIMEMultipart
 import json
 import random
 import os 
-import hashlib
-
-
-
-
 
 
 USERS_FILE =  "users.json"
